@@ -15,7 +15,7 @@ let editing = false; // controla se o formulário está em modo edição
 
 // Fetch products
 async function fetchProducts() {
-  const response = await fetch('http://localhost:3000/products');
+  const response = await fetch('http://34.229.123.42:3000/products');
   const products = await response.json();
 
   productList.innerHTML = '';
@@ -93,7 +93,7 @@ searchBtn.addEventListener('click', async () => {
 
 // add
 async function addProduct(name, description, price) {
-  await fetch('http://localhost:3000/products', {
+  await fetch('http://34.229.123.42:3000/products', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ name, description, price })
@@ -102,7 +102,7 @@ async function addProduct(name, description, price) {
 
 // update
 async function updateProduct(id, name, description, price) {
-  await fetch(`http://localhost:3000/products/${id}`, {
+  await fetch(`http://34.229.123.42:3000/products/${id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ name, description, price })
@@ -111,13 +111,13 @@ async function updateProduct(id, name, description, price) {
 
 // delete
 async function deleteProduct(id) {
-  await fetch(`http://localhost:3000/products/${id}`, {
+  await fetch(`http://34.229.123.42:3000/products/${id}`, {
     method: 'DELETE'
   });
 }
 
 async function fetchProductById(id) {
-  const response = await fetch(`http://localhost:3000/products/${id}`);
+  const response = await fetch(`http://34.229.123.42:3000/products/${id}`);
   
   if (!response.ok) {
     return null; 
