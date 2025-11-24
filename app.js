@@ -1,83 +1,141 @@
 const productList = document.querySelector('#products');
-const addProductForm = document.querySelector('#add-product-form');
-const updateProductForm = document.querySelector('#update-product-form');
-const updateProductId = document.querySelector('#update-id');
-const updateProductName = document.querySelector('#update-name');
-const updateProductPrice = document.querySelector('#update-price');
-const updateProductDescription = document.querySelector('#update-description');
+const productForm = document.querySelector('#product-form');
+const formTitle = document.querySelector('#form-title');
+const submitBtn = document.querySelector('#submit-btn');
+const productId = document.querySelector('#product-id');
+const nameInput = document.querySelector('#name');
+const descriptionInput = document.querySelector('#description');
+const priceInput = document.querySelector('#price');
+const searchInput = document.querySelector('#search-id');
+const searchBtn = document.querySelector('#search-btn');
+const searchResult = document.querySelector('#search-result');
 
-// Function to fetch all products from the server
+
+let editing = false; // controla se o formulário está em modo edição
+
+// Fetch products
 async function fetchProducts() {
   const response = await fetch('http://localhost:3000/products');
   const products = await response.json();
 
-  // Clear product list
   productList.innerHTML = '';
 
-  // Add each product to the list
   products.forEach(product => {
     const li = document.createElement('li');
-    li.innerHTML = `${product.name} - $${product.description} - $${product.price}`;
+    li.innerHTML = `ID: ${product.id} — ${product.name} — ${product.description} — R$ ${product.price}`;
 
-    // Add delete button for each product
-    const deleteButton = document.createElement('button');
-    deleteButton.innerHTML = 'Delete';
-    deleteButton.addEventListener('click', async () => {
+    // delete
+    const deleteBtn = document.createElement('button');
+    deleteBtn.innerText = 'Delete';
+    deleteBtn.onclick = async () => {
       await deleteProduct(product.id);
-      await fetchProducts();
-    });
-    li.appendChild(deleteButton);
+      fetchProducts();
+    };
 
-    // Add update button for each product
-    const updateButton = document.createElement('button');
-    updateButton.innerHTML = 'Update';
-    updateButton.addEventListener('click', () => {
-      updateProductId.value = product.id;
-      updateProductName.value = product.name;
-      updateProductDescription.value = product.description;
-      updateProductPrice.value = product.price;
-    });
-    li.appendChild(updateButton);
+    // update (coloca o form em modo edição)
+    const updateBtn = document.createElement('button');
+    updateBtn.innerText = 'Update';
+    updateBtn.onclick = () => {
+      editing = true;
+
+      productId.value = product.id;
+      nameInput.value = product.name;
+      descriptionInput.value = product.description;
+      priceInput.value = product.price;
+
+      formTitle.innerText = 'Update Product';
+      submitBtn.innerText = 'Save Changes';
+    };
+
+    li.appendChild(deleteBtn);
+    li.appendChild(updateBtn);
 
     productList.appendChild(li);
   });
 }
 
-
-// Event listener for Add Product form submit button
-addProductForm.addEventListener('submit', async event => {
+productForm.addEventListener('submit', async event => {
   event.preventDefault();
-  const name = addProductForm.elements['name'].value;
-  const description = addProductForm.elements['description'].value;
-  const price = addProductForm.elements['price'].value;
-  await addProduct(name,description, price);
-  addProductForm.reset();
-  await fetchProducts();
+
+  const name = nameInput.value.trim();
+  const description = descriptionInput.value.trim();
+  const price = parseFloat(priceInput.value);
+
+  if (!editing) {
+    await addProduct(name, description, price);
+  } else {
+    await updateProduct(productId.value, name, description, price);
+  }
+
+  resetForm();
+  fetchProducts();
 });
 
-// Function to add a new product
-async function addProduct(name, price) {
-  const response = await fetch('http://localhost:3000/products', {
+searchBtn.addEventListener('click', async () => {
+  const id = searchInput.value.trim();
+
+  if (!id) {
+    searchResult.innerText = "Digite um ID válido!";
+    return;
+  }
+
+  const product = await fetchProductById(id);
+
+  if (!product) {
+    searchResult.innerText = "Produto não encontrado.";
+    return;
+  }
+
+  searchResult.innerText = 
+    `ID: ${product.id} | ${product.name} — ${product.description} — R$${product.price}`;
+});
+
+
+// add
+async function addProduct(name, description, price) {
+  await fetch('http://localhost:3000/products', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ name, description, price })
   });
-  return response.json();
 }
 
-// Function to delete a new product
-async function deleteProduct(id) {
-  const response = await fetch('http://localhost:3000/products/' + id, {
-    method: 'DELETE',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    //body: JSON.stringify({id})
+// update
+async function updateProduct(id, name, description, price) {
+  await fetch(`http://localhost:3000/products/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name, description, price })
   });
+}
+
+// delete
+async function deleteProduct(id) {
+  await fetch(`http://localhost:3000/products/${id}`, {
+    method: 'DELETE'
+  });
+}
+
+async function fetchProductById(id) {
+  const response = await fetch(`http://localhost:3000/products/${id}`);
+  
+  if (!response.ok) {
+    return null; 
+  }
   return response.json();
 }
 
-// Fetch all products on page load
+
+// voltar o form ao modo "Add"
+function resetForm() {
+  editing = false;
+
+  productId.value = "";
+  productForm.reset();
+  formTitle.innerText = "Add Product";
+  submitBtn.innerText = "Add";
+}
+
+
+
 fetchProducts();

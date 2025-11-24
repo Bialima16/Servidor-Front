@@ -7,23 +7,36 @@
 <body>
   <h1>Product CRUD</h1>
 
-  <form id="add-product-form">
-    <h2>Add Product</h2>
-    <label for="name">Name:</label>
-    <input type="text" id="name" name="name" required>
-    <label for="name">Description:</label>
-    <input type="text" id="description" name="description" required>
-    <label for="price">Price:</label>
-    <input type="number" id="price" name="price" required step="0.01">
-    <button type="submit">Add</button>
+  <form id="product-form">
+    <h2 id="form-title">Add Product</h2>
+
+    <input type="hidden" id="product-id">
+
+    <label>Name:</label>
+    <input type="text" id="name" required>
+
+    <label>Description:</label>
+    <input type="text" id="description" required>
+
+    <label>Price:</label>
+    <input type="number" id="price" required step="0.01">
+
+    <button type="submit" id="submit-btn">Add</button>
+    <h2>Consultar Produto por ID</h2>
+  <div id="search-container">
+    <input type="number" id="search-id">
+    <button id="search-btn" type="button">Buscar</button>
+     <p id="search-result"></p>
+  </div>
   </form>
+
+
+  
+
+ 
 
   <ul id="products"></ul>
 
   <script src="app.js"></script>
-  <script>
-    // Call fetchProducts() when the page loads
-    window.addEventListener('load', fetchProducts);
-  </script>
 </body>
 </html>
